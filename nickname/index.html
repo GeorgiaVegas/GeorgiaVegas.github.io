@@ -3,15 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nick Color Preview</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
+<title>PastelizeNick Tester</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0d0d0f;
-    --surface: #17171b;
-    --border: #2a2a32;
-    --muted: #555566;
+    --panel: #141418;
+    --border: #2a2a35;
+    --accent: #7c6aff;
     --text: #e8e8f0;
+    --muted: #5a5a72;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Noto Sans KR', sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,414 +22,500 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Noto Sans KR', sans-serif;
+    font-family: var(--sans);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    overflow-x: hidden;
+    padding: 60px 20px 80px;
   }
 
-  /* Subtle grid background */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      linear-gradient(rgba(124,106,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,106,255,0.03) 1px, transparent 1px);
     background-size: 40px 40px;
-    opacity: 0.3;
     pointer-events: none;
+    z-index: 0;
   }
 
   .container {
-    width: 100%;
-    max-width: 560px;
     position: relative;
     z-index: 1;
+    width: 100%;
+    max-width: 680px;
   }
 
-  header {
-    margin-bottom: 2.5rem;
-  }
+  header { margin-bottom: 48px; text-align: left; }
 
-  .label-mono {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: var(--muted);
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 3px;
     text-transform: uppercase;
-    margin-bottom: 0.5rem;
+    margin-bottom: 12px;
+    display: block;
   }
 
   h1 {
-    font-family: 'Space Mono', monospace;
-    font-size: 1.5rem;
+    font-family: var(--mono);
+    font-size: clamp(22px, 5vw, 36px);
     font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 10px;
   }
 
-  h1 span {
-    display: inline-block;
-    background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
   }
 
-  .input-area {
-    background: var(--surface);
+  .input-section {
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1.25rem;
+    padding: 28px;
+    margin-bottom: 28px;
     transition: border-color 0.2s;
   }
 
-  .input-area:focus-within {
-    border-color: #6366f1;
-  }
+  .input-section:focus-within { border-color: var(--accent); }
 
   .input-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
+    font-family: var(--mono);
+    font-size: 11px;
     color: var(--muted);
+    letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 0.6rem;
-    font-family: 'Space Mono', monospace;
+    display: block;
+    margin-bottom: 14px;
   }
 
-  input[type="text"] {
+  #nick-input {
     width: 100%;
     background: transparent;
     border: none;
     outline: none;
+    font-family: var(--mono);
+    font-size: 26px;
     color: var(--text);
-    font-family: 'Space Mono', monospace;
-    font-size: 1.25rem;
-    caret-color: #6366f1;
+    caret-color: var(--accent);
+    letter-spacing: 1px;
   }
 
-  input::placeholder { color: var(--muted); }
+  #nick-input::placeholder { color: #2e2e3e; }
 
-  /* Preview */
-  .preview-card {
-    background: var(--surface);
+  .result-section {
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    min-height: 90px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .preview-row {
     display: flex;
     align-items: center;
-    gap: 1rem;
-  }
-
-  .color-swatch {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    border: 2px solid rgba(255,255,255,0.08);
-    transition: background-color 0.25s ease;
-    box-shadow: 0 0 24px var(--nick-color, transparent);
-  }
-
-  .nick-display {
-    font-family: 'Space Mono', monospace;
-    font-size: 1.4rem;
-    font-weight: 700;
-    word-break: break-all;
-    transition: color 0.25s ease;
-    line-height: 1.3;
-  }
-
-  .nick-display.empty {
-    color: var(--muted);
-    font-weight: 400;
-    font-size: 0.9rem;
-    font-family: 'Noto Sans KR', sans-serif;
-  }
-
-  /* Debug info */
-  .debug-grid {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    font-family: 'Space Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--muted);
-  }
-
-  .debug-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.3rem 0;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
     border-bottom: 1px solid var(--border);
   }
 
-  .debug-row:last-child { border-bottom: none; }
+  .color-swatch {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.08);
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+  }
 
-  .debug-key { color: #6366f1; }
+  .preview-nick {
+    font-family: var(--mono);
+    font-size: clamp(18px, 4vw, 28px);
+    font-weight: 700;
+    transition: color 0.15s ease;
+    word-break: break-all;
+  }
 
-  .debug-val {
+  .data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .data-cell {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .data-cell.full { grid-column: 1 / -1; }
+
+  .data-key {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .data-value {
+    font-family: var(--mono);
+    font-size: 15px;
     color: var(--text);
-    font-weight: 700;
+    word-break: break-all;
   }
 
-  /* History */
-  .history {
-    margin-top: 1.25rem;
-  }
+  .hsv-bars { display: flex; flex-direction: column; gap: 8px; }
 
-  .history-title {
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
+  .hsv-row { display: flex; align-items: center; gap: 10px; }
+
+  .hsv-label {
+    font-family: var(--mono);
+    font-size: 11px;
     color: var(--muted);
-    text-transform: uppercase;
-    font-family: 'Space Mono', monospace;
-    margin-bottom: 0.6rem;
+    width: 14px;
   }
 
-  .history-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  .hsv-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
   }
 
-  .history-chip {
-    padding: 0.3rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-family: 'Space Mono', monospace;
-    cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: var(--surface);
-    transition: transform 0.15s, opacity 0.15s;
-    font-weight: 700;
+  .hsv-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--accent);
+    transition: width 0.15s ease;
   }
 
-  .history-chip:hover { transform: scale(1.05); opacity: 0.9; }
-
-  .clear-btn {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
+  .hsv-num {
+    font-family: var(--mono);
+    font-size: 11px;
     color: var(--muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: 'Space Mono', monospace;
-    text-transform: uppercase;
-    padding: 0.2rem 0;
-    transition: color 0.2s;
-    float: right;
+    width: 38px;
+    text-align: right;
   }
 
-  .clear-btn:hover { color: var(--text); }
+  .bytes-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .byte-chip {
+    background: rgba(124,106,255,0.1);
+    border: 1px solid rgba(124,106,255,0.2);
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  .empty-hint {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: var(--mono);
+  }
+
+  .empty-hint .arrow {
+    font-size: 22px;
+    display: block;
+    margin-bottom: 8px;
+    opacity: 0.4;
+  }
+
+  .presets-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .preset-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 5px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .preset-btn:hover {
+    background: rgba(124,106,255,0.1);
+    border-color: rgba(124,106,255,0.4);
+    color: var(--text);
+  }
+
+  @keyframes pulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+
+  .pulse { animation: pulse 0.2s ease; }
 </style>
 </head>
 <body>
+
 <div class="container">
   <header>
-    <p class="label-mono">EasyChat · Garry's Mod</p>
-    <h1><span>PastelizeNick</span> Preview</h1>
+    <span class="tag">GMod EasyChat</span>
+    <h1>PastelizeNick<br>Tester</h1>
+    <p class="subtitle">닉네임 문자열 → 해시 → HSV 컬러 변환 실시간 시뮬레이터<br>UTF-8 한글 / 이모지 / 특수문자 모두 지원</p>
   </header>
 
-  <div class="input-area">
-    <div class="input-label">닉네임 입력</div>
-    <input type="text" id="nickInput" placeholder="닉네임을 입력하세요..." autocomplete="off" />
+  <div class="input-section">
+    <label class="input-label" for="nick-input">닉네임 입력</label>
+    <input
+      type="text"
+      id="nick-input"
+      placeholder="닉네임을 입력하세요..."
+      autocomplete="off"
+      spellcheck="false"
+    >
   </div>
 
-  <div class="preview-card">
-    <div class="color-swatch" id="swatch"></div>
-    <div class="nick-display empty" id="nickDisplay">닉네임을 입력하면 색상이 표시됩니다</div>
+  <div class="result-section" id="result-section">
+    <div class="empty-hint" id="empty-hint">
+      <span class="arrow">↑</span>
+      닉네임을 입력하면 결과가 여기 표시됩니다
+    </div>
+    <div id="result-content" style="display:none">
+      <div class="preview-row">
+        <div class="color-swatch" id="swatch"></div>
+        <div class="preview-nick" id="preview-nick"></div>
+      </div>
+
+      <div class="data-grid">
+        <div class="data-cell">
+          <div class="data-key">Hash Value</div>
+          <div class="data-value" id="out-hash">—</div>
+        </div>
+        <div class="data-cell">
+          <div class="data-key">Hex Color</div>
+          <div class="data-value" id="out-hex">—</div>
+        </div>
+
+        <div class="data-cell">
+          <div class="data-key">Hue (°)</div>
+          <div class="data-value" id="out-hue">—</div>
+        </div>
+        <div class="data-cell">
+          <div class="data-key">RGB</div>
+          <div class="data-value" id="out-rgb">—</div>
+        </div>
+
+        <div class="data-cell full">
+          <div class="data-key">HSV Breakdown</div>
+          <div class="hsv-bars">
+            <div class="hsv-row">
+              <span class="hsv-label">H</span>
+              <div class="hsv-track"><div class="hsv-fill" id="bar-h"></div></div>
+              <span class="hsv-num" id="num-h"></span>
+            </div>
+            <div class="hsv-row">
+              <span class="hsv-label">S</span>
+              <div class="hsv-track"><div class="hsv-fill" id="bar-s"></div></div>
+              <span class="hsv-num" id="num-s"></span>
+            </div>
+            <div class="hsv-row">
+              <span class="hsv-label">V</span>
+              <div class="hsv-track"><div class="hsv-fill" id="bar-v"></div></div>
+              <span class="hsv-num" id="num-v"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-cell full">
+          <div class="data-key">UTF-8 Bytes</div>
+          <div class="bytes-wrap" id="out-bytes"></div>
+        </div>
+
+        <div class="data-cell full">
+          <div class="data-key">Branch Conditions</div>
+          <div class="data-value" id="out-sat-branch">—</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="debug-grid" id="debugGrid" style="display:none">
-    <div class="debug-row">
-      <span class="debug-key">hash</span>
-      <span class="debug-val" id="dbgHash">—</span>
-    </div>
-    <div class="debug-row">
-      <span class="debug-key">hue</span>
-      <span class="debug-val" id="dbgHue">—</span>
-    </div>
-    <div class="debug-row">
-      <span class="debug-key">saturation</span>
-      <span class="debug-val" id="dbgSat">—</span>
-    </div>
-    <div class="debug-row">
-      <span class="debug-key">value (brightness)</span>
-      <span class="debug-val" id="dbgVal">—</span>
-    </div>
-    <div class="debug-row">
-      <span class="debug-key">rgb</span>
-      <span class="debug-val" id="dbgRgb">—</span>
-    </div>
-    <div class="debug-row">
-      <span class="debug-key">hex</span>
-      <span class="debug-val" id="dbgHex">—</span>
-    </div>
-  </div>
-
-  <div class="history" id="historySection" style="display:none">
-    <div class="history-title">
-      최근 기록
-      <button class="clear-btn" id="clearBtn">지우기</button>
-    </div>
-    <div class="history-list" id="historyList"></div>
+  <div style="margin-top: 4px;">
+    <div class="presets-label">빠른 테스트</div>
+    <div class="presets" id="presets"></div>
   </div>
 </div>
 
 <script>
-// ── Lua 로직 그대로 JS로 포팅 ──────────────────────────────────────────────
+// ── Lua 알고리즘 JS 포팅 ─────────────────────────────────────
+
+function textToBytes(text) {
+  return Array.from(new TextEncoder().encode(text));
+}
 
 function stringHash(text) {
-  const MOD1 = 4294967279n; // 2^32 - 17
-  const MOD2 = 4294967291n; // 2^32 - 5
+  const bytes = textToBytes(text);
+  const len = bytes.length;
 
-  let counter = 1n;
-  const len = text.length;
+  let counter = BigInt(1);
+  const MOD_LOOP  = BigInt(4294967279); // 2^32 - 17
+  const MOD_FINAL = BigInt(4294967291); // 2^32 - 5
 
   for (let i = 0; i < len; i += 3) {
-    const b0 = BigInt(text.charCodeAt(i));
-    const b1 = i + 1 < len ? BigInt(text.charCodeAt(i + 1)) : BigInt(len - i + 256);
-    const b2 = i + 2 < len ? BigInt(text.charCodeAt(i + 2)) : BigInt(len - i + 256);
+    const b0 = BigInt(bytes[i]);
+    const b1 = BigInt(bytes[i + 1] !== undefined ? bytes[i + 1] : (len - i + 256));
+    const b2 = BigInt(bytes[i + 2] !== undefined ? bytes[i + 2] : (len - i + 256));
 
     counter =
-      (counter * 8161n) % MOD1 +
-      b0 * 16776193n +
-      b1 * 8372226n +
-      b2 * 3932164n;
+      (counter * BigInt(8161)) % MOD_LOOP +
+      b0 * BigInt(16776193) +
+      b1 * BigInt(8372226)  +
+      b2 * BigInt(3932164);
   }
 
-  return Number(counter % MOD2);
+  return Number(counter % MOD_FINAL);
 }
 
 function hsvToRgb(h, s, v) {
-  // h: 0-360, s: 0-1, v: 0-1
+  h = ((h % 360) + 360) % 360;
   const c = v * s;
   const x = c * (1 - Math.abs((h / 60) % 2 - 1));
   const m = v - c;
-  let r, g, b;
-
-  if      (h < 60)  { r = c; g = x; b = 0; }
-  else if (h < 120) { r = x; g = c; b = 0; }
-  else if (h < 180) { r = 0; g = c; b = x; }
-  else if (h < 240) { r = 0; g = x; b = c; }
-  else if (h < 300) { r = x; g = 0; b = c; }
-  else              { r = c; g = 0; b = x; }
-
+  let r = 0, g = 0, b = 0;
+  if      (h < 60)  { r=c; g=x; b=0; }
+  else if (h < 120) { r=x; g=c; b=0; }
+  else if (h < 180) { r=0; g=c; b=x; }
+  else if (h < 240) { r=0; g=x; b=c; }
+  else if (h < 300) { r=x; g=0; b=c; }
+  else              { r=c; g=0; b=x; }
   return {
     r: Math.round((r + m) * 255),
     g: Math.round((g + m) * 255),
-    b: Math.round((b + m) * 255),
+    b: Math.round((b + m) * 255)
   };
 }
 
 function pastelizeNick(nick) {
-  const hash = stringHash(nick);
-  const hue      = (hash % 180) * 2;          // 0–358
-  const satLow   = hash % 3 === 0;            // 0.3 or 0.6
-  const valDark  = hash % 127 === 0;          // 0.6 or 1.0
-  const s = satLow  ? 0.3 : 0.6;
-  const v = valDark ? 0.6 : 1.0;
-  const rgb = hsvToRgb(hue, s, v);
-  return { hash, hue, s, v, rgb };
+  const hash       = stringHash(nick);
+  const saturation = hash % 3 === 0;   // true → S = 0.3 (파스텔), false → S = 0.6
+  const value      = hash % 127 === 0; // true → V = 0.6 (어둠), false → V = 1.0
+  const hue        = (hash % 180) * 2;
+  const s          = saturation ? 0.3 : 0.6;
+  const v          = value      ? 0.6 : 1.0;
+  const rgb        = hsvToRgb(hue, s, v);
+  return { hash, hue, s, v, rgb, saturation, value };
 }
 
-function toHex(r, g, b) {
-  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
-}
+// ── DOM 참조 ───────────────────────────────────────────────────
 
-// ── UI ──────────────────────────────────────────────────────────────────────
+const input         = document.getElementById('nick-input');
+const emptyHint     = document.getElementById('empty-hint');
+const resultContent = document.getElementById('result-content');
+const swatch        = document.getElementById('swatch');
+const previewNick   = document.getElementById('preview-nick');
+const outHash       = document.getElementById('out-hash');
+const outHex        = document.getElementById('out-hex');
+const outHue        = document.getElementById('out-hue');
+const outRgb        = document.getElementById('out-rgb');
+const outBytes      = document.getElementById('out-bytes');
+const outSatBranch  = document.getElementById('out-sat-branch');
+const barH = document.getElementById('bar-h');
+const barS = document.getElementById('bar-s');
+const barV = document.getElementById('bar-v');
+const numH = document.getElementById('num-h');
+const numS = document.getElementById('num-s');
+const numV = document.getElementById('num-v');
 
-const input       = document.getElementById('nickInput');
-const swatch      = document.getElementById('swatch');
-const nickDisplay = document.getElementById('nickDisplay');
-const debugGrid   = document.getElementById('debugGrid');
-const histSec     = document.getElementById('historySection');
-const histList    = document.getElementById('historyList');
-const clearBtn    = document.getElementById('clearBtn');
+function toHex(n) { return n.toString(16).padStart(2, '0').toUpperCase(); }
 
-let history = [];
+function update() {
+  const nick = input.value;
 
-function updatePreview(nick) {
   if (!nick) {
-    swatch.style.backgroundColor = '';
-    swatch.style.setProperty('--nick-color', 'transparent');
-    nickDisplay.textContent = '닉네임을 입력하면 색상이 표시됩니다';
-    nickDisplay.classList.add('empty');
-    nickDisplay.style.color = '';
-    debugGrid.style.display = 'none';
+    emptyHint.style.display = 'block';
+    resultContent.style.display = 'none';
     return;
   }
 
-  const { hash, hue, s, v, rgb } = pastelizeNick(nick);
-  const hex = toHex(rgb.r, rgb.g, rgb.b);
-  const cssColor = `rgb(${rgb.r},${rgb.g},${rgb.b})`;
+  emptyHint.style.display = 'none';
+  resultContent.style.display = 'block';
 
-  // Swatch
-  swatch.style.backgroundColor = cssColor;
-  swatch.style.setProperty('--nick-color', cssColor);
+  const { hash, hue, s, v, rgb, saturation, value } = pastelizeNick(nick);
+  const hexColor = `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
 
-  // Nick text
-  nickDisplay.textContent = nick;
-  nickDisplay.style.color = cssColor;
-  nickDisplay.classList.remove('empty');
+  swatch.classList.remove('pulse');
+  void swatch.offsetWidth;
+  swatch.classList.add('pulse');
 
-  // Debug
-  debugGrid.style.display = 'block';
-  document.getElementById('dbgHash').textContent = hash.toLocaleString();
-  document.getElementById('dbgHue').textContent  = `${hue}°`;
-  document.getElementById('dbgSat').textContent  = `${(s * 100).toFixed(0)}%`;
-  document.getElementById('dbgVal').textContent  = `${(v * 100).toFixed(0)}%`;
-  document.getElementById('dbgRgb').textContent  = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
-  document.getElementById('dbgHex').textContent  = hex;
+  swatch.style.background = hexColor;
+  previewNick.style.color = hexColor;
+  previewNick.textContent = nick;
+
+  outHash.textContent = hash.toLocaleString() + '  (0x' + hash.toString(16).toUpperCase() + ')';
+  outHex.textContent  = hexColor;
+  outHue.textContent  = hue + '°';
+  outRgb.textContent  = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+
+  barH.style.width      = (hue / 360 * 100).toFixed(1) + '%';
+  barH.style.background = `hsl(${hue}, 80%, 55%)`;
+  barS.style.width      = (s * 100).toFixed(0) + '%';
+  barV.style.width      = (v * 100).toFixed(0) + '%';
+  numH.textContent = hue + '°';
+  numS.textContent = (s * 100).toFixed(0) + '%';
+  numV.textContent = (v * 100).toFixed(0) + '%';
+
+  const bytes = textToBytes(nick);
+  outBytes.innerHTML = bytes.map(b =>
+    `<span class="byte-chip">0x${b.toString(16).toUpperCase().padStart(2,'0')}</span>`
+  ).join('');
+
+  outSatBranch.textContent =
+    `hash % 3 = ${hash % 3}  →  S = ${s}  ${saturation ? '✦ 파스텔 모드' : ''}` +
+    `  |  hash % 127 = ${hash % 127}  →  V = ${v}  ${value ? '✦ 어두운 모드' : ''}`;
 }
 
-function addHistory(nick) {
-  if (!nick || history.includes(nick)) return;
-  history.unshift(nick);
-  if (history.length > 12) history.pop();
-  renderHistory();
-}
+input.addEventListener('input', update);
 
-function renderHistory() {
-  histList.innerHTML = '';
-  history.forEach(nick => {
-    const { rgb } = pastelizeNick(nick);
-    const hex = toHex(rgb.r, rgb.g, rgb.b);
-    const chip = document.createElement('div');
-    chip.className = 'history-chip';
-    chip.textContent = nick;
-    chip.style.color = hex;
-    chip.style.borderColor = hex + '44';
-    chip.addEventListener('click', () => {
-      input.value = nick;
-      updatePreview(nick);
-    });
-    histList.appendChild(chip);
+// ── 프리셋 버튼 ───────────────────────────────────────────────
+
+const presetNicks = [
+  'Player', 'Admin', 'xX_NoScope_Xx',
+  '홍길동', '김철수', '이영희',
+  '한글유저', '😎 Cool', '日本語テスト',
+  '☆彡', 'αβγδ', 'Łukasz'
+];
+
+const presetsEl = document.getElementById('presets');
+presetNicks.forEach(nick => {
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn';
+  btn.textContent = nick;
+  btn.addEventListener('click', () => {
+    input.value = nick;
+    update();
+    input.focus();
   });
-  histSec.style.display = history.length ? 'block' : 'none';
-}
-
-input.addEventListener('input', () => updatePreview(input.value));
-
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && input.value.trim()) {
-    addHistory(input.value.trim());
-  }
-});
-
-clearBtn.addEventListener('click', () => {
-  history = [];
-  renderHistory();
+  presetsEl.appendChild(btn);
 });
 </script>
 </body>
